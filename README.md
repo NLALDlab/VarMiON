@@ -18,3 +18,7 @@ For the sake of simplicity we consider, from now on, the homogeneous Dirichlet b
 Patel, D., Ray, D., Abdelmalik, M.R., Hughes, T.J., Oberai, A.A.: Variationally mimetic
 operator networks. *Computer Methods in Applied Mechanics and Engineering* **419** (2024).
 https://doi.org/10.1016/j.cma.2023.116536
+
+
+L. Rinaldi, E. Chinellato, P. Martin, and F. Marcuzzi: Exploiting scientific machine learning on embedded
+digital twins. *Springer series: Lectures Notes in Computational Science and Engineering - Math to Product*. Submitted 2024.
