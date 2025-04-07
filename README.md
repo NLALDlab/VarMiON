@@ -2,10 +2,10 @@
 Python implementation of a Variationally Mimetic Operator Network for time-dependent PDEs
 
 We want to extend the VarMiON, to a time-dependent heat equation defined as
-$$C(\vc x){\frac{\partial}{\partial t} u(\vc x,t)}-  \dvg(\beta(\vc x)\nabla u(\vc x, t))&= f(\vc x,t)  &(\vc x, t) \in \Omega \times [0, \tau],\\
-    \beta(\vc x)\nabla u(\vc x, t) \cdot \vc n &= \eta(\vc x,t)  &(\vc x, t) \in \Gamma_N \times [0, \tau],\\
-    u(\vc x,t)&= g(\vc x, t)  &(\vc x, t) \in \Gamma_D\times [0, \tau],\\
-    u(\vc x,0)&= u_0(\vc x)  &(\vc x, t) \in \Omega \times \{0\},
+$$C(x){\frac{\partial}{\partial t} u( x,t)}-  \dvg(\beta(\vc x)\nabla u(x, t))= f( x,t)  (x, t) \in \Omega \times [0, \tau],\\
+    \beta( x)\nabla u(x, t) \cdot \vc n = \eta(x,t)  ( x, t) \in \Gamma_N \times [0, \tau],\\
+    u( x,t)= g( x, t)  ( x, t) \in \Gamma_D\times [0, \tau],\\
+    u( x,0)= u_0( x)  (x, t) \in \Omega \times \{0\},
 $$
 for the temperature field $u: \Omega \times [0,\tau] \rightarrow \mathbb R$ where $u \in L^2([0,\tau]; H^1_{D}(\Omega))$. For the sake of simplicity we consider, from now on, the homogeneous Dirichlet boundary conditions.
 
