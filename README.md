@@ -3,7 +3,7 @@ Python implementation of a Variationally Mimetic Operator Network for time-depen
 
 We want to extend the VarMiON, to a time-dependent heat equation defined as
 
-$$C(x){\frac{\partial}{\partial t} u( x,t)}-  div(\beta( x)\nabla u(x, t))= f( x,t)  (x, t) \in \Omega \times [0, \tau],$$
+$$C(x){\frac{\partial}{\partial t} u( x,t)}-  div(\beta( x)\nabla u(x, t))= f( x,t) \quad (x, t) \in \Omega \times [0, \tau],$$
 
 $$\beta( x)\nabla u(x, t) \cdot  n = \eta(x,t) \quad ( x, t) \in \Gamma_N \times [0, \tau],$$
 
