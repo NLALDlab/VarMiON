@@ -12,7 +12,7 @@ $$u( x,t)= g( x, t)  \quad  ( x, t) \in \Gamma_D\times [0, \tau],$$
 $$ u( x,0)= u_0( x)  \quad  (x, t) \in \Omega \times \{0\},$$
 
 for the temperature field $u: \Omega \times [0,\tau] \rightarrow \mathbb R$ where $u \in L^2([0,\tau]; H^1_{D}(\Omega))$. 
-For the sake of simplicity we consider, from now on, the homogeneous Dirichlet boundary conditions.
+For the sake of simplicity we consider the homogeneous Dirichlet boundary conditions $g( x, t)=0$.
 
 # References
 
