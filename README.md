@@ -14,6 +14,7 @@ $$ u( x,0)= u_0( x)  \quad  (x, t) \in \Omega \times \{0\},$$
 for the temperature field $u: \Omega \times [0,\tau] \rightarrow \mathbb R$ where $u \in L^2([0,\tau]; H^1_{D}(\Omega))$. 
 For the sake of simplicity we consider, from now on, the homogeneous Dirichlet boundary conditions.
 
+# References
 
 Patel, D., Ray, D., Abdelmalik, M.R., Hughes, T.J., Oberai, A.A.: Variationally mimetic
 operator networks. *Computer Methods in Applied Mechanics and Engineering* **419** (2024).
