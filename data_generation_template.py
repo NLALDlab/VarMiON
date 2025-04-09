@@ -1,3 +1,8 @@
+
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2025 NLALDlab
+# Authors: NLALDlab
+
 """
 This script provides a template for generating a dataset for a PDE problem.
 
