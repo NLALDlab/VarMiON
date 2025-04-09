@@ -1,87 +1,91 @@
-# This file should generate a folder containing:
+"""
+This script provides a template for generating a dataset for a PDE problem.
 
-# an npy file 'eval_pts' in which there are:
+The dataset includes:
+- Samples of PDE parameters
+- Samples of initial and boundary conditions
+- PDE solutions at sampled time-space points
 
-    # one nparray with shape (100, 2) containing the coordinates of the points where we sample the parameters C, theta and f 
-    # one nparray with shape (36, 2) containing the coordinates of the points on the boundary where we sample g
-    # one nparray with shape (100+nb,) containing the coordinates of the points where we sample the temperature
-    # one nparray with shape (n_times,) containing the time instants where we compute the solution, including the first time instant for which the solution is given
-    # one nparray with shape () containing an integer that specifies the number of boundary points where we sample the solution
+The data is saved as '.npy' files, organized per PDE instance (in total 'num_pdes' files),
+plus a shared 'eval_pts.npy' file that contains the coordinates and times used for sampling.
 
+Sampling conventions:
+- Functions defined over the full domain are sampled on a uniform NxN grid
+- Boundary functions are sampled on M boundary points
+- Time-dependent functions are sampled at 'k' time steps given in the array 'times'
+- Solutions may also be sampled at 'nb' extra boundary points (optional)
 
-# and for each pde instance a file 'record_{i}.npy' with i=0,...,num_pdes-1 with:
-    # an array with shape (100,) containing a sample of the thermal capacity C
-    # an array with shape (100,) containing a sample of the thermal conductivity theta
-    # an array with shape (n_times-1, 100) containing a sample of the heat source f
-    # an array with shape () containing the value of the heat tranfer constant h
-    # an array with shape (n_times-1, 36) containing a sample of the environment temperature g
-    # an array with shape (n_times, 100) containing a sample of the solution
+The shared file `eval_pts.npy` stores the arrays containing the:
+    - grid point coordinates                   shape: (N^2, d)
+    - boundary point coordinates               shape: (M, d)
+    - solution sampling points                 shape: (N^2 + nb, d)
+    - time instants                            shape: (k,)
+    - number of extra boundary points used     shape: ()
 
+The i-th PDE instance is saved as `record_{i}.npy`, containing:
+    - Parameter values, boundary/initial conditions, and the solution
+"""
 
 # As an example the script can be structured in the following way:
 
-if __name__ = '__main__':
+import numpy as np
+import os
+
+if __name__ == '__main__':
                    
     num_pdes = ...  # number of pde instances in the dataset                
-    pde.tdim = 2 # dimension of the domain                  
-                                                    
-    param_pts = ...  # coordinates of the points where we sample the parameters C, theta and f
-    param_bry_pts = ... # containing the coordinates of the points on the boundary where we sample g
-    temp_pts = ... # coordinates of the points where we sample the temperature
-    times = ... # time instants where we compute the solution, including the first time instant for which the solution is given
-    nb = 0 # number of extra boundary points where we sample the temperature            #M da togliere?
+    d = 2 # dimension of the domain
+                      
+
+    # --- Sampling points ---                                              
+    param_pts = ...       # (N^2, d): points to sample parameters
+    param_bry_pts = ...   # (M, d): points to sample boundary functions
+    u_pts = ...           # (N^2 + nb, d): points to evaluate the solution
+    times = ...           # (k,): time steps
+    nb = ...              # Number (>= 0) of extra boundary points in the solution
     
-    
-    # create a folder in which to save the results
-    dir_name = lambda t: f"heat_eq_robin_2d_{num_pdes}/{t}"
+    # === OUTPUT FOLDER SETUP ===
+    dir_name = lambda t: f"dataset_{num_pdes}/{t}"
     os.system(f'rm -r {dir_name("")}')
     os.system(f'mkdir {dir_name("")}')
     
+    # Save the shared evaluation points
     with open(dir_name("eval_pts"), 'wb') as file:
         np.save(file, param_pts)
         np.save(file, param_bry_pts)
-        np.save(file, temp_pts)
+        np.save(file, u_pts)
         np.save(file, times)
         np.save(file, nb)
     
-                  
-    # we define a dictionary where we temporarily store the data            
+    # === DATA STORAGE STRUCTURE ===            
     data = dict(
-        f = np.zeros(shape = (num_pdes, len(times)-1, n_param_pts), dtype = np.float32),
-        theta = np.zeros(shape = (num_pdes, n_param_pts), dtype = np.float32),
-        c = np.zeros(shape = (num_pdes, n_param_pts), dtype = np.float32),
-        g = np.zeros(shape = (num_pdes, len(times)-1, n_param_bry_pts), dtype = np.float32),
-        h = np.zeros(shape = num_pdes, dtype = np.float32),
-        solution = np.zeros(shape = (num_pdes, len(times), n_temp_pts), dtype = np.float32),
+        parameter_1 = np.zeros(shape = (num_pdes, len(times), len(param_pts)), dtype = np.float32),
+        parameter_2 = np.zeros(shape = (num_pdes, len(param_bry_pts)), dtype = np.float32),
+        # Add more as needed
+        # ...
+        solution = np.zeros(shape = (num_pdes, len(times), len(u_pts)), dtype = np.float32),
         ) 
                 
-    
-    dir_record = lambda t: f"heat_eq_robin_2d_{num_pdes}/record_{t}.npy"
-              
+    # === MAIN DATA GENERATION LOOP ===
+    dir_record = lambda t: dir_name + f"record_{t}.npy"         
     for i in range(num_pdes):
-        print("pde instance #", i)      
-        
-        ### generate the parameters and boundary/initial conditions relative to the i-th instance of the pde
-        for j in range(len(times)-1):
-            data["f"][i, j, :] = ...
-            data["g"][i, j, :] = ...
-        #endfor
-            
-        data["theta"][i, :] = ...
-        data["c"][i, :] = ...
-        data["h"][i] = ...
-              
-        ### solve instance i of the pde obtaining the solution:     
-        for j in range(len(times)):
-            data["solution"][i, j, :] = ...
-        #endfor
+        print("PDE instance #", i)      
 
-        # store the data in a npy file 
+        # --- Sample parameters and and initial/boundary conditions ---
+        data["parameter_1"][i,:,:] = ... 
+        data["parameter_2"][i,:] = ... 
+        # Add other components here
+
+        # --- Solve PDE for instance i ---
+        data["solution"][i, :, :] = ...
+
+        # --- Save the instance data --- 
         with open(dir_record(i), 'wb') as file:                  
-            np.save(file, data["c"][i,:])
-            np.save(file, data["theta"][i,:])
-            np.save(file, data["f"][i, :, :])
-            np.save(file, data["h"][i])
-            np.save(file, data["g"][i, :, :])   
+            np.save(file, data["parameter_1"][i,:])
+            np.save(file, data["parameter_2"][i,:])
+            # Add more saves if you have more parameters
+
             np.save(file, data["solution"][i, :, :]) 
     #endfor
+    
+    print("Dataset generation complete.")
