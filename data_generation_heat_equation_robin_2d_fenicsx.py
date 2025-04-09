@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (c) 2025 NLALDlab
+# Authors: NLALDlab
+
+
 import os
 import numpy as np
 from abc import ABC, abstractmethod
