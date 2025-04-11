@@ -1,5 +1,5 @@
 # The VarMiON tutorial
-This is the source code for the VarMioN tutorial. If you have any comments, corrections or questions, please submit an issue in the issue tracker.
+This is the source code for the VarMiON tutorial. If you have any comments, corrections or questions, please submit an issue in the issue tracker.
 
 
 
