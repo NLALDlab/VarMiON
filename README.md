@@ -1,20 +1,30 @@
-# VarMiON
-Python implementation of a Variationally Mimetic Operator Network for time-dependent PDEs
+# The VarMiON tutorial
+This is the source code for the VarMioN tutorial. If you have any comments, corrections or questions, please submit an issue in the issue tracker.
 
-We want to extend the VarMiON, to a time-dependent heat equation defined as
 
-$$C(x){\frac{\partial}{\partial t} u( x,t)}-  div(\beta( x)\nabla u(x, t))= f( x,t) \quad (x, t) \in \Omega \times [0, \tau],$$
 
-$$\beta( x)\nabla u(x, t) \cdot  n = \eta(x,t) \quad ( x, t) \in \Gamma_N \times [0, \tau],$$
+## PDE structure
+Python implementation of a Variationally Mimetic Operator Network for time-dependent heat equation with Robin's boundary condition.
 
-$$u( x,t)= g( x, t)  \quad  ( x, t) \in \Gamma_D\times [0, \tau],$$
+The time-dependent heat equation is defined as follow
+
+$$C(x){\frac{\partial}{\partial t} u( x,t)}-  div(\theta( x)\nabla u(x, t))= f( x,t) \quad (x, t) \in \Omega \times [0, \tau],$$
+
+$$\beta( x)\nabla u(x, t) \cdot  n = h(u(x,t)-g(x,t)) \quad ( x, t) \in \Gamma_N \times [0, \tau],$$
  
-$$ u( x,0)= u_0( x)  \quad  (x, t) \in \Omega \times \{0\},$$
+$$ u( x,0)= u_0( x)  \quad  (x, t) \in \Omega \times \{ 0 \},$$
 
-for the temperature field $u: \Omega \times [0,\tau] \rightarrow \mathbb R$ where $u \in L^2([0,\tau]; H^1_{D}(\Omega))$. 
-For the sake of simplicity we consider the homogeneous Dirichlet boundary conditions $g( x, t)=0$.
+for the temperature field $u: \Omega \times [0,\tau] \rightarrow \mathbb R$ where $u \in L^2([0,\tau]; H^1(\Omega))$. 
 
-# References
+## Generation of PDE data
+Here you can find the files to generate the PDE data to train your VarMiON in
+
+* data_generation_heat_equation_robin_2d_fenicsx.py : you can generate and save the data by exploiting the numerical solution of the pde with the Python's Library "FeniCSx";
+* data_generation_template.py : you can save youtr data in the correct format.
+
+
+
+## References
 
 Patel, D., Ray, D., Abdelmalik, M.R., Hughes, T.J., Oberai, A.A.: Variationally mimetic
 operator networks. *Computer Methods in Applied Mechanics and Engineering* **419** (2024).
