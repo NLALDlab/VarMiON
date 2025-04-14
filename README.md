@@ -4,13 +4,13 @@ This is the source code for the VarMiON tutorial. If you have any comments, corr
 
 
 ## PDE structure
-Python implementation of a Variationally Mimetic Operator Network for time-dependent heat equation with Robin's boundary condition.
+Python implementation of a Variationally Mimetic Operator Network for the time-dependent heat equation with initial Dirichlet conditions and Robin boundary conditions.
 
-The time-dependent heat equation is defined as follow
+The time-dependent heat equation is defined as follow:
 
 $$C(x){\frac{\partial}{\partial t} u( x,t)}-  div(\theta( x)\nabla u(x, t))= f( x,t) \quad (x, t) \in \Omega \times [0, \tau],$$
 
-$$\beta( x)\nabla u(x, t) \cdot  n = h(u(x,t)-g(x,t)) \quad ( x, t) \in \Gamma_N \times [0, \tau],$$
+$$-\theta( x)\nabla u(x, t) \cdot  n = h(u(x,t)-g(x,t)) \quad ( x, t) \in \partial \Omega \times [0, \tau],$$
  
 $$ u( x,0)= u_0( x)  \quad  (x, t) \in \Omega \times \{ 0 \},$$
 
@@ -19,8 +19,8 @@ for the temperature field $u: \Omega \times [0,\tau] \rightarrow \mathbb R$ wher
 ## Generation of PDE data
 Here you can find the files to generate the PDE data to train your VarMiON in
 
-* data_generation_heat_equation_robin_2d_fenicsx.py : you can generate and save the data by exploiting the numerical solution of the pde with the Python's Library "FeniCSx";
-* data_generation_template.py : you can save youtr data in the correct format.
+* data_generation_heat_equation_robin_2d_fenicsx.py : you can generate and save the data by exploiting the numerical solution of the pde with the Python's Library "FEniCSx"; this file requires version 0.9.0 of DOLFINx, you can run a Docker image with DOLFINx with the command `docker run -ti dolfinx/dolfinx:v0.9.0`
+* data_generation_template.py : if you want to use your data, this file shows how to save it in the correct format.
 
 
 
