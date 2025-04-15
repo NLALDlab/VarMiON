@@ -326,7 +326,7 @@ class pde_heat_eq__robin(PDE):
                   
         self.g_vec = [dolfinx.fem.Function(self.function_space) for _ in range(self.n_times-1)]
         self.g = dolfinx.fem.Function(self.function_space)
-        self.g.name = 'f'  
+        self.g.name = 'g'  
                   
         self.solution_vec = [dolfinx.fem.Function(self.function_space) for _ in range(self.n_times)]
         
