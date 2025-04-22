@@ -22,6 +22,20 @@ Here you can find the files to generate the PDE data to train your VarMiON in
 * data_generation_heat_equation_robin_2d_fenicsx.py : you can generate and save the data by exploiting the numerical solution of the pde with the Python's Library "FEniCSx"; this file requires version 0.9.0 of DOLFINx, you can run a Docker image with DOLFINx with the command `docker run -ti dolfinx/dolfinx:v0.9.0`
 * data_generation_template.py : if you want to use your data, this file shows how to save it in the correct format.
 
+## Requirements
+
+To run this project, create a Conda environment with the required packages. Replace `environment_name` with a name of your choice:
+
+`conda create -n environment_name python=3.11 matplotlib scipy seaborn pytorch pytorch-cuda=11.8 -c pytorch -c nvidia`
+
+Note: Python and PyTorch must be compatible with the CUDA version installed on your system. For more details, see the official PyTorch installation guide https://pytorch.org/get-started/locally/.
+
+To use the environment in Jupyter notebooks:
+
+`source activate base`
+`conda activate environment_name`
+`conda install ipykernel`
+`python -m ipykernel install --user --name environment_name --display-name "Python (environment_name)"`
 
 
 ## References
@@ -37,4 +51,4 @@ digital twins. *Springer series: Lectures Notes in Computational Science and Eng
 
 **SPDX-License-Identifier: GPL-3.0**  
 **Copyright (c) 2025 NLALDlab**  
-**Authors: NLALDlab**
+**Authors: NLALDlab, Marco Dell'Orto, Laura Rinaldi, Enrico Caregnato, Fabio Marcuzzi**
