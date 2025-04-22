@@ -32,10 +32,10 @@ Note: Python and PyTorch must be compatible with the CUDA version installed on y
 
 To use the environment in Jupyter notebooks:
 
-`source activate base`
-`conda activate environment_name`
-`conda install ipykernel`
-`python -m ipykernel install --user --name environment_name --display-name "Python (environment_name)"`
+`source activate base`  
+`conda activate environment_name`  
+`conda install ipykernel`  
+`python -m ipykernel install --user --name environment_name --display-name "Python (environment_name)"`  
 
 
 ## References
