@@ -18,14 +18,12 @@ Sampling conventions:
 - Functions defined over the full domain are sampled on a uniform NxN grid
 - Boundary functions are sampled on M boundary points
 - Time-dependent functions are sampled at 'k' time steps given in the array 'times'
-- Solutions may also be sampled at 'nb' extra boundary points (optional)
 
 The shared file `eval_pts.npy` stores the arrays containing the:
     - grid point coordinates                   shape: (N^2, d)
     - boundary point coordinates               shape: (M, d)
     - solution sampling points                 shape: (N^2 + nb, d)
     - time instants                            shape: (k,)
-    - number of extra boundary points used     shape: ()
 
 The i-th PDE instance is saved as `record_{i}.npy`, containing:
     - Parameter values, boundary/initial conditions, and the solution
@@ -47,7 +45,6 @@ if __name__ == '__main__':
     param_bry_pts = ...   # (M, d): points to sample boundary functions
     u_pts = ...           # (N^2 + nb, d): points to evaluate the solution
     times = ...           # (k,): time steps
-    nb = ...              # Number (>= 0) of extra boundary points in the solution
     
     # === OUTPUT FOLDER SETUP ===
     dir_name = lambda t: f"dataset_{num_pdes}/{t}"
@@ -60,7 +57,6 @@ if __name__ == '__main__':
         np.save(file, param_bry_pts)
         np.save(file, u_pts)
         np.save(file, times)
-        np.save(file, nb)
     
     # === DATA STORAGE STRUCTURE ===            
     data = dict(

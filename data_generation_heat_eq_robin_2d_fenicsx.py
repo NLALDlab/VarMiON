@@ -7,6 +7,10 @@ import os
 import numpy as np
 from abc import ABC, abstractmethod
 from datetime import datetime
+from tqdm import tqdm
+import shutil
+import argparse
+
 
 # works with dolfinx 0.9.0
 import dolfinx, dolfinx.fem.petsc, petsc4py, ufl
@@ -17,9 +21,6 @@ import mpi4py.MPI as MPI
 # contains the classes:
 # PDE --> gives the structure of a class that solves a PDE
 # pde_heat_eq__robin(PDE) --> solves the heat equation with Robin boundary conditions
-#M le classi relative ad altre pde possono essere cancellate o usate in seguito...
-
-
 
 
 class PDE(ABC):
@@ -124,7 +125,7 @@ class pde_heat_eq__robin(PDE):
         # setup solver
         u_n = dolfinx.fem.Function(self.function_space)
         u_n.name = "u_n"
-        u_n.x.array[:] = self.solution_vec[0].x.array[:] #np.zeros(self.num_points)
+        u_n.x.array[:] = self.solution_vec[0].x.array[:]
         
         u = ufl.TrialFunction(self.function_space)
         v = ufl.TestFunction(self.function_space)
@@ -170,68 +171,59 @@ class pde_heat_eq__robin(PDE):
             
             # Save solution at current time step
             self.solution_vec[i+1].x.array[:] = u_n.x.array  
-        #endfor                
+        #endfor   
+        
+        
+        
+def evaluation_cells(domain, pts):
+
+    # Find cell indices on which to evaluate the given points
+
+    # Inputs:
+    # domain: dolfinx mesh
+    # pts: nparray with shape (number of points, 3)
+    
+    # Output:
+    # cells: list of indices such that the point pts[i,:] belongs to the cell cells[i] of domain
+    
+    bb_tree = dolfinx.geometry.bb_tree(domain, domain.geometry.dim)
+    potential_colliding_cells = dolfinx.geometry.compute_collisions_points(bb_tree, pts)
+    colliding_cells = dolfinx.geometry.compute_colliding_cells(domain, potential_colliding_cells, pts)
+
+    cells = []
+    for i in range(len(pts)):
+        cells.append(colliding_cells.links(i)[0])
+    #endfor
+    return cells
+        
                                     
 
-def generate_data(num_pdes, domain, function_space, param_pts, param_bry_pts, temp_pts, times, nb=0):
+def generate_data(num_pdes, domain, function_space, param_pts, param_bry_pts, temp_pts, times):
         
         # num_pdes: number of pde instances to be generated
         # param_pts: nparray with shape (n_param_pts, 3) containing points on which we sample parameters
         # param_bry_pts: nparray with shape (n_param_bry_pts, 3) containing boundary points on which we sample parameters
         # temp_pts: nparray with shape (n_temp_pts, 3), spatial grid on which we sample the temperature
-        # nb = 0: there are only grid points
-        # nb > 0: there are nb boundary points after the grid points
 
         n_param_pts = len(param_pts)
         n_param_bry_pts = len(param_bry_pts)
         n_temp_pts = len(temp_pts)
 
-        # Reorder 'lexicographically' temp_pts
-        if nb==0:
-            indices = np.lexsort(temp_pts.T)
-            temp_pts = temp_pts[indices]
-        else:
-            indices = np.lexsort(temp_pts[:-nb].T)
-            temp_pts[:-nb] = temp_pts[:-nb][indices]
-        #endif
-            
+        # Reorder temp_pts
+        indices = np.lexsort(temp_pts.T)
+        temp_pts = temp_pts[indices]
+        
+        
+        
+        cells_param = evaluation_cells(domain, param_pts)
+        cells_param_bry = evaluation_cells(domain, param_bry_pts)
+        cells_temp = evaluation_cells(domain, temp_pts)
 
-        # Find cells on which to evaluate param_pts and save them in cells_param_pts
-        bb_tree = dolfinx.geometry.bb_tree(domain, domain.geometry.dim)
-        potential_colliding_cells = dolfinx.geometry.compute_collisions_points(bb_tree, param_pts)
-        colliding_cells = dolfinx.geometry.compute_colliding_cells(domain, potential_colliding_cells, param_pts)
-
-        cells_param_pts = []
-        for i in range(len(param_pts)):
-            cells_param_pts.append(colliding_cells.links(i)[0])
-        #endfor
-                  
-                  
-        # Find cells on which to evaluate param_bry_pts and save them in cells_param_bry_pts
-        bb_tree = dolfinx.geometry.bb_tree(domain, domain.geometry.dim)
-        potential_colliding_cells = dolfinx.geometry.compute_collisions_points(bb_tree, param_bry_pts)
-        colliding_cells = dolfinx.geometry.compute_colliding_cells(domain, potential_colliding_cells, param_bry_pts)
-
-        cells_param_bry_pts = []
-        for i in range(len(param_bry_pts)):
-            cells_param_bry_pts.append(colliding_cells.links(i)[0])
-        #endfor             
-    
-                  
-            
-        # Find cells on which to evaluate temp_pts and save them in cells_temp_pts
-        bb_tree = dolfinx.geometry.bb_tree(domain, domain.geometry.dim)
-        potential_colliding_cells = dolfinx.geometry.compute_collisions_points(bb_tree, temp_pts)
-        colliding_cells = dolfinx.geometry.compute_colliding_cells(domain, potential_colliding_cells, temp_pts)
-
-        cells_temp_pts = []
-        for i in range(len(temp_pts)):
-            cells_temp_pts.append(colliding_cells.links(i)[0])
-        #endfor
-            
-
+                       
+        # create PDE object
         pde = pde_heat_eq__robin(domain, function_space, times)
 
+        
         data = dict(
             f = np.zeros(shape = (num_pdes, len(times)-1, n_param_pts), dtype = np.float32),
             theta = np.zeros(shape = (num_pdes, n_param_pts), dtype = np.float32),
@@ -240,38 +232,66 @@ def generate_data(num_pdes, domain, function_space, param_pts, param_bry_pts, te
             h = np.zeros(shape = num_pdes, dtype = np.float32),
             solution = np.zeros(shape = (num_pdes, len(times), n_temp_pts), dtype = np.float32),
         )
-        
-        dir_name = lambda t: f"heat_eq_robin_2d_{num_pdes}/{t}"
-        dir_record = lambda t: f"heat_eq_robin_2d_{num_pdes}/record_{t}.npy"
 
-        os.system(f'rm -r {dir_name("")}')
-        os.system(f'mkdir {dir_name("")}')
+        
+        # create directory in which to save the data
+        # if there already exists a directory with the same name, delete it after user confirmation
+        dir_name = f"heat_eq_robin_2d_{num_pdes}"
+        dir_record = lambda t: f"{dir_name}/record_{t}.npy"
+        
+        
+        while os.path.isdir(dir_name):
+            confirm = input(f"\nA folder with the name '{dir_name}' already exists. \nProceeding will permanently delete its contents. Continue? (y/n): ").strip().lower()
+            if confirm == "y":
+                shutil.rmtree(dir_name)
+                print("\nFolder deleted.\n")
+            else:
+                print("\nThe folder has not been deleted.\n")
+                dir_name = input(f"Enter a name for the new dataset folder: ").strip()
+            #endif
+        #endwhile
+            
+        
+       
+        #if os.path.isdir(dir_name):
+        #    print(f"A folder with name {dir_name} already exists.")
+        #    confirm = input(f"Delete existing dataset in '{dir_name}'? (y/n): ").strip().lower()
+        #    if confirm == "y":
+        #        shutil.rmtree(dir_name)
+        #        print("\nPrevious dataset deleted.\nGenerating new dataset.\n")
+        #    #endif
+        #    else:
+        #        print("\nExisting dataset has not been deleted.\n")
+        #        dir_name = input(f"Enter a name for the new dataset folder (existing folders may be overwritten): ").strip()
+        #        shutil.rmtree(dir_name)                
+        ##endif
+
+        os.system(f'mkdir {dir_name}')
 
         # save points and times
-        with open(dir_name("eval_pts"), 'wb') as file:
+        with open(dir_name + "/eval_pts", 'wb') as file:
             np.save(file, param_pts[:,:pde.tdim])
             np.save(file, param_bry_pts[:,:pde.tdim])
             np.save(file, temp_pts[:,:pde.tdim])
             np.save(file, times)
-            np.save(file, nb)
             
         
-        # save evaluations
-        for i in range(num_pdes):
-            if i%10==0: print("generating pde #", i)      
+        print("\n Generating dataset...\n")
+        for i in tqdm(range(num_pdes)):
+            
             pde()
 
             for j in range(len(times)-1):
-                data["f"][i, j, :] = pde.f_vec[j].eval(x = param_pts, cells = cells_param_pts).flatten()
-                data["g"][i, j, :] = pde.g_vec[j].eval(x = param_bry_pts, cells = cells_param_bry_pts).flatten()
+                data["f"][i, j, :] = pde.f_vec[j].eval(x = param_pts, cells = cells_param).flatten()
+                data["g"][i, j, :] = pde.g_vec[j].eval(x = param_bry_pts, cells = cells_param_bry).flatten()
             #endfor
                   
             for j in range(len(times)):
-                data["solution"][i, j, :] = pde.solution_vec[j].eval(x = temp_pts, cells = cells_temp_pts).flatten()
+                data["solution"][i, j, :] = pde.solution_vec[j].eval(x = temp_pts, cells = cells_temp).flatten()
             #endfor
                 
-            data["theta"][i, :] = pde.theta.eval(x = param_pts, cells = cells_param_pts).flatten()
-            data["c"][i, :] = pde.c.eval(x = param_pts, cells = cells_param_pts).flatten()
+            data["theta"][i, :] = pde.theta.eval(x = param_pts, cells = cells_param).flatten()
+            data["c"][i, :] = pde.c.eval(x = param_pts, cells = cells_param).flatten()
             data["h"][i] = pde.h
 
 
@@ -286,12 +306,13 @@ def generate_data(num_pdes, domain, function_space, param_pts, param_bry_pts, te
         
 
 if __name__ == '__main__':
-                                    
-    # add or not points on the boundary
-    boundary = False
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-n', '--num_pdes', default=2000, type=int)
+    args = parser.parse_args() 
 
     # number of pde instances to solve             
-    num_pdes = 2000
+    num_pdes = args.num_pdes
                   
 
     # dolfinx mesh used to solve the pdes
@@ -306,12 +327,10 @@ if __name__ == '__main__':
     # param_pts: nparray with shape (n_param_pts, 3) containing points on which we sample parameters
     # param_bry_pts: nparray with shape (n_param_bry_pts, 3) containing boundary points on which we sample parameters
     # temp_pts: nparray with shape (n_temp_pts, 3), spatial grid on which we sample the temperature
-    # nb = 0: there are only grid points
-    # nb > 0: there are nb boundary points after the grid points
 
 
     # times
-    times = np.linspace(0,1,10)
+    times = np.linspace(0,.1,10)
 
     # grid
     n = 10
@@ -345,19 +364,15 @@ if __name__ == '__main__':
 
     # param points
     param_points = grid_points
-    print("#param points: ", param_points.shape[0])
 
-    if boundary:
-        # stack points
-        temp_points = np.vstack((grid_points, bry_points))
-        nb = len(bry_points)
-    else:
-        temp_points = grid_points
-        nb = 0
-    #endif
+
+    temp_points = grid_points
+
 
     print(f"\n\nData Generation - {datetime.now()} \n\n")
-    generate_data(num_pdes, domain, function_space, param_points, param_bry_points, temp_points, times, nb)
+    
+    generate_data(num_pdes, domain, function_space, param_points, param_bry_points, temp_points, times)
+    
     print(f"\n\nData Generated - {datetime.now()} \n\n")        
 
 
