@@ -46,7 +46,7 @@ https://doi.org/10.1016/j.cma.2023.116536
 
 
 L. Rinaldi, E. Chinellato, P. Martin, and F. Marcuzzi: Exploiting scientific machine learning on embedded
-digital twins. *Springer series: Lectures Notes in Computational Science and Engineering - Math to Product*. Submitted 2024.
+digital twins. *Springer series: Lectures Notes in Computational Science and Engineering - Math to Product*. in press 2025.
 
 
 **SPDX-License-Identifier: GPL-3.0**  
