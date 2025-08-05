@@ -45,8 +45,9 @@ operator networks. *Computer Methods in Applied Mechanics and Engineering* **419
 https://doi.org/10.1016/j.cma.2023.116536
 
 
-L. Rinaldi, E. Chinellato, P. Martin, and F. Marcuzzi: Exploiting scientific machine learning on embedded
-digital twins. *Springer series: Lectures Notes in Computational Science and Engineering - Math to Product*. in press 2025.
+E. Chinellato, P. Martin, L. Rinaldi, and F. Marcuzzi: Exploiting scientific machine learning on embedded
+digital twins. *Springer series: Lectures Notes in Computational Science and Engineering - Math to Product* (2025).
+https://link.springer.com/book/9783031957086.
 
 
 **SPDX-License-Identifier: GPL-3.0**  
