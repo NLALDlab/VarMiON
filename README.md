@@ -1,25 +1,17 @@
 # The VarMiON tutorial
 This is the source code for the VarMiON tutorial. If you have any comments, corrections or questions, please submit an issue in the issue tracker.
 
+Python implementation of a Variationally Mimetic Operator Network for a PDE.
 
-
-## PDE structure
-Python implementation of a Variationally Mimetic Operator Network for the time-dependent heat equation with initial Dirichlet conditions and Robin boundary conditions.
-
-The time-dependent heat equation is defined as follow:
-
-$$C(x){\frac{\partial}{\partial t} u( x,t)}-  div(\theta( x)\nabla u(x, t))= f( x,t) \quad (x, t) \in \Omega \times [0, \tau],$$
-
-$$-\theta( x)\nabla u(x, t) \cdot  n = h(u(x,t)-g(x,t)) \quad ( x, t) \in \partial \Omega \times [0, \tau],$$
- 
-$$ u( x,0)= u_0( x)  \quad  (x, t) \in \Omega \times \{ 0 \},$$
-
-for the temperature field $u: \Omega \times [0,\tau] \rightarrow \mathbb R$ where $u \in L^2([0,\tau]; H^1(\Omega))$. 
+## Repository structure
+In this repository you can find two floders: "Heat_eq" and "Stokes".
+In "Heat_eq" there are the files to create and solve VarMiON for heat equation.
+In "Stokes" there are the files to create and solve VarMiON for the time-dependent Stokes problem.
 
 ## Generation of PDE data
 Here you can find the files to generate the PDE data to train your VarMiON in
 
-* data_generation_heat_equation_robin_2d_fenicsx.py : you can generate and save the data by exploiting the numerical solution of the pde with the Python's Library "FEniCSx"; this file requires version 0.9.0 of DOLFINx, you can run a Docker image with DOLFINx with the command `docker run -ti dolfinx/dolfinx:v0.9.0`
+* data_generation_equation_to_solve_fenicsx.py : you can generate and save the data by exploiting the numerical solution of the pde with the Python's Library "FEniCSx"; this file requires version 0.9.0 of DOLFINx, you can run a Docker image with DOLFINx with the command `docker run -ti dolfinx/dolfinx:v0.9.0`
 * data_generation_template.py : if you want to use your data, this file shows how to save it in the correct format.
 
 ## Requirements
