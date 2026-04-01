@@ -7,35 +7,31 @@ This is the source code for the VarMiON tutorial. If you have any comments, corr
 Python implementation of a Variationally Mimetic Operator Network for the time-dependent Stookes equation.
 
 The planar Navier--Stokes problem that describes the behavior of Newtonian viscous fluids in a domain $\Omega\subseteq\R^2$ with Lipschitz boundary and on a time interval $[0,\tau]$ consists in a system of equations for the velocity $\vc u= (u_1, u_2)^\top $ and pressure $p$. In the incompressible case, with constant and uniform mass density $\rho>0$, it reads
-\begin{equation}\label{eq_Navier--Stokes}
-\begin{aligned}
+$$
     \rho\left( \frac{\partial \vc u}{\partial t} + (\vc u \cdot \nabla) \vc u\right) = \nabla \cdot \vc\sigma(\vc u, p) + \vc f,\\
     \nabla \cdot \vc u =0,
-\end{aligned}
-\end{equation}
+$$
 where $\vc f=(f_1, f_2)^\top$ is the body force per unit volume and $\vc\sigma(\vc u, p)$ denotes the stress tensor which, for a Newtonian fluid, is given by
 %
-\begin{equation}
+$$
     \vc\sigma(\vc u, p) = 2 \mu \dot{\vc\varepsilon}(\vc u ) -p \vc I,
-\end{equation}
+$$
 with $\vc I$ the identity tensor, $\mu>0$ the dynamic viscosity, and $\dot{\vc\varepsilon}(\vc u)$ the strain-rate tensor defined as
-\begin{equation}
+$$
     \dot{\vc\varepsilon}(\vc u) := \frac{1}{2}\left ( \nabla\vc u + (\nabla \vc u)^{\top} \right).
-\end{equation}
+$$
 
 When inertial forces, that increase with the magnitude of $\vc u$, are small compared to viscous forces, the Navier--Stokes equation can be linearized to give, in the time interval $[0,\tau]$, the time-dependent Stokes problem on $\Omega\times [0,\tau]$ as
-\begin{equation}\label{eq:stokes}
-\begin{aligned}
+$$
     \rho \frac{\partial \vc u}{\partial t}  = -\nabla p+\mu\Delta \vc u + \vc f,\\
     \nabla\cdot\vc u=0,
-\end{aligned}
-\end{equation}
+$$
 in which we substituted the Newtonian form of the stress tensor.
 The differential system~\eqref{eq:stokes} must be accompanied by initial conditions on $\Omega \times \{0\}$, given by
-\begin{equation}
+$$
     \vc u(\vc x, 0) = \vc u_0(\vc x),\qquad
     p(\vc x, 0) = p_0(\vc x)    
-\end{equation}
+$$
 and boundary conditions, that will be specified for each of the problems solved in Section~\ref{sec:num_results} and for now we summarize in a vector field $\vc g$ defined on $\de\Omega\times[0,\tau]$.
 
 
