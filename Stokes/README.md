@@ -59,6 +59,12 @@ To use the environment in Jupyter notebooks:
 `conda install ipykernel`  
 `python -m ipykernel install --user --name environment_name --display-name "Python (environment_name)"`  
 
+## Folder strucrutre
+
+For each example (Cavity flow, flow past a cylinder and contraction flow) you can find:
+- the Python script for data generation
+- the zip containg the dataset
+- the Python notebook for traning and result comparison 
 
 ## References
 
