@@ -64,6 +64,7 @@ To use the environment in Jupyter notebooks:
 For each example (Cavity flow, flow past a cylinder and contraction flow) you can find:
 - the Python script for data generation
 - the Python notebook for traning and result comparison
+  
 Notice that such codes are developed starting from the ones for the Heat problem.
 
 ## References
