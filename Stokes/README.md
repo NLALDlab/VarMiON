@@ -63,7 +63,6 @@ To use the environment in Jupyter notebooks:
 
 For each example (Cavity flow, flow past a cylinder and contraction flow) you can find:
 - the Python script for data generation
-- the zip containg the dataset
 - the Python notebook for traning and result comparison 
 
 ## References
