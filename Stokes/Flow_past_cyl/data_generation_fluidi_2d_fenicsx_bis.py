@@ -62,12 +62,6 @@ from dolfinx.io import *
 from dolfinx.io import XDMFFile
 from dolfinx.geometry import *
 
-# contains the classes:
-# PDE --> gives the structure of a class that solves a PDE
-# pde_heat_eq__robin(PDE) --> solves the heat equation with Robin boundary conditions
-#M le classi relative ad altre pde possono essere cancellate o usate in seguito...
-
-
 
 
 class PDE(ABC):
@@ -134,7 +128,7 @@ class pde_heat_eq__robin(PDE):
     
     def solve(self):
         
-        # Per tests
+        #useflu for testing evaluation on a point P
         from dolfinx.geometry import bb_tree, BoundingBoxTree, compute_collisions_points, compute_colliding_cells
 
         P = [0.01,0.2, 0.0] 
@@ -148,9 +142,9 @@ class pde_heat_eq__robin(PDE):
         v = TestFunction(self.V)
         p = TrialFunction(self.Q)
         q = TestFunction(self.Q)
-                #Boundary
-                # Funzione per identificare i bordi
-        
+
+
+       #boundary conditions
         def walls(x):
             return np.logical_or(np.isclose(x[1], 0), np.isclose(x[1], 0.4))
         
@@ -275,8 +269,7 @@ class pde_heat_eq__robin(PDE):
         xdmffile_p.write_mesh(self.mesh)
 
 
-        #self.f_vec[0].x.array[:] =self.ff *8 *np.ones(np.shape(self.solution[0].x.array[:]))
-
+        
 
         self.t=0
         for i in range(self.n_times-1):
@@ -318,16 +311,11 @@ class pde_heat_eq__robin(PDE):
             u_n.x.array[:] = u_.x.array[:]
             p_n.x.array[:] = p_.x.array[:]
 
-            # Write solutions to file
-            #self.solution = u_n
-            #self.solution.vector[:] = u_n.x.array[:]
+
             self.solution[i+1].x.array[:] = u_n.x.array  
         
-            #self.solution_pressure = p_n
-            #self.solution_pressure.vector[:] = p_n.x.array[:]
             self.solution_pressure[i+1].x.array[:] = p_n.x.array  
-            #self.f_vec[i+1].x.array[:] =self.ff *8 *np.ones(np.shape(self.solution[i+1].x.array[:]))
-            #print('f_vec=', self.f_vec[i+1].x.array[:])
+
             
             u_ni=dolfinx.fem.Function(V1)
             u_ni.interpolate(u_n)
@@ -346,7 +334,7 @@ class pde_heat_eq__robin(PDE):
 
         
         #print('u',u_s.eval(P, cell[0]))
-        #print('mu',self.mu)
+
                                     
 
 def generate_data(num_pdes, mesh, V, Q, param_pts, param_bry_pts, temp_pts, times, times_train, nb=0):
@@ -399,15 +387,8 @@ def generate_data(num_pdes, mesh, V, Q, param_pts, param_bry_pts, temp_pts, time
         colliding_cells = dolfinx.geometry.compute_colliding_cells(mesh, potential_colliding_cells, param_bry_pts)
 
         cells_param_bry_pts = []
-        # for i in range(len(param_bry_pts)):
-        #      cells_param_bry_pts.append(colliding_cells.links(i)[0])
-        #endfor             
-    
-                  
-            
-        
-            
-            
+
+       
             
 
         pde = pde_heat_eq__robin(mesh, V,Q, times_train)
@@ -429,7 +410,6 @@ def generate_data(num_pdes, mesh, V, Q, param_pts, param_bry_pts, temp_pts, time
         with dolfinx.io.XDMFFile(pde.mesh.comm, filename=dir_name("/mesh.xdmf"), file_mode="w") as file:
             file.write_mesh(pde.mesh)
 
-        # save points and times #M in futuro si può aggiungere la possibilita' di valutare la sol in tempi diversi interpolando)
         with open(dir_name("eval_pts"), 'wb') as file:
             np.save(file, param_pts[:,:pde.tdim])
             np.save(file, param_bry_pts[:,:pde.tdim])
@@ -447,8 +427,7 @@ def generate_data(num_pdes, mesh, V, Q, param_pts, param_bry_pts, temp_pts, time
             data["ff"][i] = pde.ff
                   
             for j in range(len(times)):
-                #data["solution"][i, j, :] = pde.solution_vec[j].eval(x = temp_pts, cells = cells_temp_pts).flatten()
-                #data["f_vec"][i,j, :] = pde.f_vec[j * int(len(times_train)/len(times))].eval(x = temp_pts, cells = cells_temp_pts).flatten()
+              
                 data["solution"][i,j, :] = pde.solution[j * int(len(times_train)/len(times))].eval(x = temp_pts, cells = cells_temp_pts).flatten()
                 data["solution_pressure"][i,j, :] = pde.solution_pressure[j * int(len(times_train)/len(times))].eval(x = temp_pts, cells = cells_temp_pts).flatten()
 
@@ -461,7 +440,7 @@ def generate_data(num_pdes, mesh, V, Q, param_pts, param_bry_pts, temp_pts, time
                 np.save(file, data["solution"][i, :,:]) 
                 np.save(file, data["solution_pressure"][i, :,:])
                   
-#             print(f'{data["mu"][i].shape= }')
+
 
                   
         #endfor
@@ -486,37 +465,37 @@ if __name__ == '__main__':
     gmsh.option.setNumber("General.Terminal", 0)
     gmsh.model.add("rettangolo_con_buco")
 
-    # Crea rettangolo grande
+    # Rectangle
     rettangolo_grande = gmsh.model.occ.addRectangle(0.0, 0.0, 0.0, L, R)
 
-    # Crea disco interno (buco)
+    # Hole
     buco = gmsh.model.occ.addDisk(0.2, 0.2, 0.0, radius , radius )
 
-    # Sincronizza geometria prima della differenza
+    # Syncronize
     gmsh.model.occ.synchronize()
 
 
-    # Esegui la differenza booleana: rettangolo meno disco
+    # Difference
     rettangolo_tagliato = gmsh.model.occ.cut([(2, rettangolo_grande)], [(2, buco)])
     gmsh.model.occ.synchronize()
     
 
-    # Estrai l'ID della superficie risultante
+    # Surface
     superficie_finale = rettangolo_tagliato[0][0][1]
 
-    # Aggiungi gruppo fisico per la superficie
+    # Physical group
     gmsh.model.addPhysicalGroup(2, [superficie_finale])
     gmsh.model.setPhysicalName(2, 1, "Dominio_senza_disco")
 
-    # Punto al centro del buco
+    # Center
     p_centro = gmsh.model.occ.addPoint(0.2, 0.2, 0)
     gmsh.model.occ.synchronize()
     
-    # Campo di distanza dal centro
+    # distance from center
     dist = gmsh.model.mesh.field.add("Distance")
     gmsh.model.mesh.field.setNumbers(dist, "NodesList", [p_centro])
     
-    # Threshold: mesh fitta entro 3*radius, grossolana fuori
+    # Threshold
     thresh = gmsh.model.mesh.field.add("Threshold")
     gmsh.model.mesh.field.setNumber(thresh, "InField", dist)
     gmsh.model.mesh.field.setNumber(thresh, "SizeMin", 0.02)   # entro 3*radius
@@ -524,33 +503,33 @@ if __name__ == '__main__':
     gmsh.model.mesh.field.setNumber(thresh, "DistMin", 2*radius)
     gmsh.model.mesh.field.setNumber(thresh, "DistMax", 3*radius)
     
-    # Attiva il campo come background mesh
+    # Background mesh
     gmsh.model.mesh.field.setAsBackgroundMesh(thresh)
 
     
-    # Imposta la risoluzione della mesh
+    # Resolution
     #gmsh.model.mesh.setSize(gmsh.model.getEntities(0), 0.04)
     
 
-    # Imposta opzioni di mesh
+    # Options
     gmsh.option.setNumber("Mesh.Algorithm", 6)        # Delaunay triangulation
-    gmsh.option.setNumber("Mesh.ElementOrder", 1)     # Elementi di ordine 1
-    gmsh.option.setNumber("Mesh.RecombineAll", 0)     # Solo triangoli
+    gmsh.option.setNumber("Mesh.ElementOrder", 1)     # 1st order elements
+    gmsh.option.setNumber("Mesh.RecombineAll", 0)     # Triangles
 
-    # Genera mesh 2D
+    # 2D mesh
     gmsh.model.mesh.generate(2)
 
-    # Converte in mesh Dolfinx
+    # Dolfinx
     meshbr, cell_markers_b, facet_markers_b = gmshio.model_to_mesh(gmsh.model, MPI.COMM_SELF, 0)
 
-    # Finalizza Gmsh
+    # Gmsh
     gmsh.finalize()              
 
-    # Assegna nomi
+    # Names
     cell_markers_b.name = f"{meshbr.name}_cells"
     facet_markers_b.name = f"{meshbr.name}_facets"
 
-    # Usa la mesh
+    # mesh
     mesh = meshbr
     tdim = mesh.topology.dim
                   
@@ -559,7 +538,8 @@ if __name__ == '__main__':
     print("Topology dimension:", mesh.topology.dim)
     print("Cell name:", mesh.topology.cell_name())
     from ufl import VectorElement
-    # Definizione corretta degli elementi
+  
+    # Elements definitions
     v_cg2 =  VectorElement("Lagrange", mesh.topology.cell_name(), 2, dim=mesh.geometry.dim)
     s_cg1 = element("Lagrange", mesh.topology.cell_name(), 1)
     #print("UFL cell from element:", v_cg2.ufl_cell())
@@ -586,14 +566,14 @@ if __name__ == '__main__':
     vx = np.linspace(0,L ,nx)
     grid_points0 = np.array([[ vx[j], vy[i], 0] for j in range(nx) for i in range(ny)])
     
-    # Centro e raggio del cerchio
+    # Hole
     center = np.array([0.2, 0.2])
     
 
-    # Calcolo della distanza dal centro (solo XY)
+    # Distance
     distances = np.linalg.norm(grid_points0[:, :2] - center, axis=1)
 
-    # Filtro: escludi i punti dentro il cerchio
+    # Filter exclusion
     grid_points = grid_points0[distances >= radius]               
                   
     # param boundary points
@@ -601,9 +581,9 @@ if __name__ == '__main__':
     wx = np.linspace(0,L,m)
     wy = np.linspace(0,R,m)
     
-    bottom = np.column_stack((wx, np.zeros(m)))               # bordo inferiore (y = 0)
-    top = np.column_stack((wx, np.full(m, R)))              # bordo superiore (y = 0.4)
-    left = np.column_stack((np.zeros(m-2), wy[1:-1]))          # bordo sinistro (x = 0)
+    bottom = np.column_stack((wx, np.zeros(m)))               # boundary bottom (y = 0)
+    top = np.column_stack((wx, np.full(m, R)))              # boundary top (y = 0.4)
+    left = np.column_stack((np.zeros(m-2), wy[1:-1]))          # boundary left (x = 0)
     right = np.column_stack((np.full(m-2, L), wy[1:-1])) 
 
     param_bry_points = np.vstack((bottom, top, left, right))
@@ -616,9 +596,9 @@ if __name__ == '__main__':
     wx = np.linspace(0,L,m)
     wy = np.linspace(0,R,m)
 
-    bottom = np.column_stack((wx, np.zeros(m)))               # bordo inferiore (y = 0)
-    top = np.column_stack((wx, np.full(m, R)))              # bordo superiore (y = 0.41)
-    left = np.column_stack((np.zeros(m-2), wy[1:-1]))          # bordo sinistro (x = 0)
+    bottom = np.column_stack((wx, np.zeros(m)))               # boundary bottom (y = 0)
+    top = np.column_stack((wx, np.full(m, R)))              # boundary top (y = 0.41)
+    left = np.column_stack((np.zeros(m-2), wy[1:-1]))          # boundary left (x = 0)
     right = np.column_stack((np.full(m-2, L), wy[1:-1])) 
 
     bry_points = np.vstack((bottom, top, left, right))
