@@ -41,6 +41,10 @@ E. Chinellato, P. Martin, L. Rinaldi, and F. Marcuzzi: Exploiting scientific mac
 digital twins. *Springer series: Lectures Notes in Computational Science and Engineering - Math to Product* (2025).
 https://link.springer.com/book/9783031957086.
 
+L.Rinaldi, G.G. Giusteri: Variationally mimetic operator network approach to transient viscous flows. 
+*submitted* (2026).
+https://arxiv.org/abs/2604.02124
+
 
 **SPDX-License-Identifier: GPL-3.0**  
 **Copyright (c) 2025 NLALDlab**  
